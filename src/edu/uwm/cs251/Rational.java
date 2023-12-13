@@ -8,7 +8,8 @@ package edu.uwm.cs251;
  */
 public final class Rational implements Comparable<Rational> {
 
-	private final int den, num;
+	private int den;
+	private int num;
 	// Data Structure invariant:
 	// den must be positive and if num is zero, must be 1.
 	// If num is not zero than the gcd of the two
@@ -36,7 +37,10 @@ public final class Rational implements Comparable<Rational> {
 	 * @return GCD of the two arguments
 	 */
 	public static long gcd(long a, long b) {
-		return 0; // TODO
+		if(a==0) {
+			return b;
+		}
+		return gcd(b%a, b); // TODO
 	}
 	
 	/**
@@ -50,6 +54,14 @@ public final class Rational implements Comparable<Rational> {
 	 */
 	public Rational(int m, int n) {
 		this((long)m, (long)n); // let the private constructor handle all the work.
+		long gcd = gcd(Math.abs(num), Math.abs(den));
+		if(gcd != 0) {
+			num /= gcd;
+			den /= gcd;
+		}
+		if (den <= 0) {
+            throw new ArithmeticException("Denominator must be positive");
+        }
 	}
 	
 	// Internal constructor so that intermediate computatiosn can get bigger than
