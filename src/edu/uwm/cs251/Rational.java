@@ -101,7 +101,15 @@ public final class Rational implements Comparable<Rational> {
      * @exception ArithmeticException if the rational number cannot be represented.
      */
     public static Rational fromString(String s) {
-        return null;
+        Objects.requireNonNull(s);
+        int slashIndex = s.indexOf('/');
+        if (slashIndex == -1) {
+            throw new IllegalArgumentException("No '/' in the string");
+        }
+        int num = Integer.parseInt(s.substring(0,slashIndex));
+        int den = Integer.parseInt(s.substring(slashIndex + 1));
+
+        return new Rational(num,den);
     }
 
     /**
@@ -109,13 +117,19 @@ public final class Rational implements Comparable<Rational> {
      * @return the closest double approximation
      */
     public double asDouble() {
-        return 0.0; // TODO
+        return (double)num/den; // TODO
     }
 
     @Override
     public boolean equals(Object x) {
-        // TODO
-        return false;
+        if (this == x) {
+            return true;
+        }
+        if (x == null || getClass() != x.getClass()) {
+            return false;
+        }
+        Rational rational = (Rational) x;
+        return num == rational.num && den == rational.den;
     }
 
     @Override
