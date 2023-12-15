@@ -1,12 +1,12 @@
 package edu.uwm.cs251;
-import java.util.Objects;
 
 /**
  * An immutable class representing rational numbers.
- * It can only represent rationals in which both the
+ * It can only represent rational in which both the
  * numerator and denominator are 32 bit integers,
  * and the denominator positive.
  */
+
 public final class Rational implements Comparable<Rational> {
 
     private final int den, num;
@@ -31,18 +31,24 @@ public final class Rational implements Comparable<Rational> {
      * In other words, return the largest positive number n
      * such that n divides both a and b.
      * For example the GCD of -12 and 18 is 6.
-     * As a special exception trhe gcd of Long.MIN_VALUE with itself is itself.
+     * As a special exception the gcd of Long.MIN_VALUE with itself is itself.
      * @param a first number
      * @param b second number
      * @return GCD of the two arguments
      */
     public static long gcd(long a, long b) {
+    	a = Math.abs(a);
+	    b = Math.abs(b);
+	    if (a == 0 || b == 0) {
+	        return Math.max(a, b); // return the non-zero argument as the GCD
+	    }
+	    
         while(b != 0) {
             long temp = b;
             b = a%b;
             a=temp;			// TODO
         }
-        return a;
+        return Math.abs(a);
     }
 
     /**
@@ -58,9 +64,15 @@ public final class Rational implements Comparable<Rational> {
         this((long)m, (long)n); // let the private constructor handle all the work.
     }
 
-    // Internal constructor so that intermediate computatiosn can get bigger than
+    // Internal constructor so that intermediate computations can get bigger than
     // the size of an int.
-    private Rational (long m, long n) {long gcd = gcd(Math.abs(m), Math.abs(n));
+    private Rational (long m, long n) {
+    	
+    	if (n == 0) {
+            throw new ArithmeticException("Denominator cannot be zero");
+        }
+    	
+    	long gcd = gcd(Math.abs(m), Math.abs(n));
         if (gcd != 0) {
             m /= gcd;
             n /= gcd;
@@ -70,9 +82,8 @@ public final class Rational implements Comparable<Rational> {
             n = -n;
         }
 
-        // Check if the result can be represented as int
         if (m > Integer.MAX_VALUE || m < Integer.MIN_VALUE || n > Integer.MAX_VALUE) {
-            throw new ArithmeticException("Result cannot be represented as an integer");
+            throw new ArithmeticException("Result cannot be represented as an Integer.MIN_VALUE");
         }
 
         // Leave these last lines in place:
@@ -100,17 +111,25 @@ public final class Rational implements Comparable<Rational> {
      * @return rational described by the string
      * @exception ArithmeticException if the rational number cannot be represented.
      */
-    public static Rational fromString(String s) {
-        Objects.requireNonNull(s);
-        int slashIndex = s.indexOf('/');
-        if (slashIndex == -1) {
-            throw new IllegalArgumentException("No '/' in the string");
-        }
-        int num = Integer.parseInt(s.substring(0,slashIndex));
-        int den = Integer.parseInt(s.substring(slashIndex + 1));
+	public static Rational fromString(String s) {
+		String[] parts = s.trim().split("/");
+	    if (parts.length != 2) {
+	        throw new IllegalArgumentException("Invalid format: " + s);
+	    }
+	    
+	    try {
+	        int num = Integer.parseInt(parts[0].trim());
+	        int den = Integer.parseInt(parts[1].trim());
 
-        return new Rational(num,den);
-    }
+	        if (den == 0) {
+	            throw new ArithmeticException("Denominator cannot be zero");
+	        }
+
+	        return new Rational(num, den);
+	    } catch (NumberFormatException e) {
+	        throw new NumberFormatException("Invalid number format: " + s);
+	    }
+	}
 
     /**
      * Convert this rational to its closest double approximation.
@@ -139,7 +158,8 @@ public final class Rational implements Comparable<Rational> {
 
     @Override
     public int compareTo(Rational r) {
-        return 0; // TODO
+        /*return Integer.compare(num*r.den,r.num*den);*/ // TODO
+    	return Double.compare(this.asDouble(), r.asDouble());
     }
 
     /**
@@ -147,24 +167,64 @@ public final class Rational implements Comparable<Rational> {
      * @param r rational to add, must not be null
      * @return rational that is the number of this and r.
      * @exception ArithmeticException if the resulting rational cannot be
-     * represented as m/n where both m and n are ints and n is positive.
+     * represented as m/n where both m and n are integers and n is positive.
      */
     public Rational add(Rational r) {
-        return null; // TODO
+    	long resultNum = (long) this.num * r.den + (long) r.num * this.den;
+    	long resultDen = (long) this.den * r.den;
+
+    	long gcd = Rational.gcd(resultNum, resultDen);
+    if (resultNum / gcd < Integer.MIN_VALUE || resultNum / gcd > Integer.MAX_VALUE || resultDen / gcd <= 0) {
+    	   throw new ArithmeticException("Resulting rational cannot be represented as m/n where both m and n are ints and n is positive..");
+    }
+    return new Rational((int) (resultNum / gcd), (int) (resultDen / gcd));
     }
 
-    /** TODO: Write this documentation comment */
+    /** TODO: Write this documentation comment
+     *
+     * This returns arithmetic negation of this rational: −m/n.
+     @return negation of this rational
+     @throws ArithmeticException if the negation cannot be represented.*/
     public Rational neg() {
-        return null; // TODO
+    	if (num == Integer.MIN_VALUE) {
+	        throw new ArithmeticException("Cannot negate the rational");
+	    }
+	    return new Rational(-num, den); // TODO
     }
 
-    /** TODO: Write this documentation comment */
+    /** TODO: Write this documentation comment
+     *
+     * This returns the multiplication of rational and the argument rational numbers
+     @return product of this and r
+     @throws ArithmeticException if the product cannot be represented. */
+    
     public Rational mul(Rational r) {
-        return null; // TODO
-    }
+        long num = (long) this.num * r.num;
+        long den = (long) this.den * r.den;
+	    long gcd = Rational.gcd(num, den);
 
-    /** TODO: Write this documentation comment */
+	    if (gcd != 1) {
+	        num /= gcd;
+	        den /= gcd;
+	    }
+
+	    if (num < Integer.MIN_VALUE || num > Integer.MAX_VALUE || den <= 0) {
+	        throw new ArithmeticException("Resulting rational cannot be represented.");
+	    }
+
+	    return new Rational(num, den);
+	} // TODO
+    
+
+    /** TODO: Write this documentation comment
+     *
+     * This gives the multiplicative inverse of the rational n/m
+     @return multiplicative inverse of this rational
+     @throws ArithmeticException if the inverse cannot be represented*/
     public Rational inv() {
-        return null; // TODO
+        if (num==Integer.MIN_VALUE) {
+            throw new ArithmeticException("Cannot invert zero");
+        }
+        return new Rational(den, num);
     }
 }
