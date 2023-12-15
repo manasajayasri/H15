@@ -1,5 +1,7 @@
-package edu.uwm.cs251;
+/*Name: Manasa Jayasri Thambabathula
+ * Email: thambab2@uwm.edu*/
 
+package edu.uwm.cs251;
 /**
  * An immutable class representing rational numbers.
  * It can only represent rational in which both the
@@ -14,7 +16,6 @@ public final class Rational implements Comparable<Rational> {
     // den must be positive and if num is zero, must be 1.
     // If num is not zero than the gcd of the two
     // must be one.
-
     /**
      * Create the rational number n/1.
      * @param n integer value
