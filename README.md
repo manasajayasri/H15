@@ -1,6 +1,6 @@
 # CompSci 251 / CompSt 750 Homework Assignment 15
 
-This is a homework assignment at University of Wisconsin-Milwaukee.
+This is a homework at University of Wisconsin-Milwaukee.
 
 ## Contents
 
